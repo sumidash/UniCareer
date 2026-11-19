@@ -1,0 +1,125 @@
+.register-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+  background: linear-gradient(135deg, #0B1020, #171C35);
+  font-family: Arial, sans-serif;
+}
+
+.register-container {
+  width: 100%;
+  max-width: 480px;
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(167, 139, 250, 0.25);
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+}
+
+.register-logo {
+  text-align: center;
+  color: #F4F3FA;
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 25px;
+}
+
+.register-logo span {
+  color: #D8B978;
+}
+
+.register-container h1 {
+  color: #F4F3FA;
+  text-align: center;
+  font-size: 29px;
+  margin-bottom: 10px;
+}
+
+.register-subtitle {
+  color: #aaa9bc;
+  text-align: center;
+  font-size: 14px;
+  margin-bottom: 28px;
+}
+
+.register-container form {
+  display: flex;
+  flex-direction: column;
+}
+
+.register-container label {
+  color: #F4F3FA;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.register-container input {
+  padding: 13px;
+  margin-bottom: 18px;
+  border: 1px solid rgba(167, 139, 250, 0.3);
+  border-radius: 9px;
+  background: #11172C;
+  color: white;
+  font-size: 14px;
+  outline: none;
+}
+
+.register-container input:focus {
+  border-color: #A78BFA;
+}
+
+.register-container input::placeholder {
+  color: #77778d;
+}
+
+.register-container button {
+  padding: 14px;
+  margin-top: 8px;
+  border: none;
+  border-radius: 9px;
+  background: #A78BFA;
+  color: #171C35;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.register-container button:hover {
+  background: #D8B978;
+  transform: translateY(-2px);
+}
+
+.register-login {
+  color: #aaa9bc;
+  text-align: center;
+  font-size: 14px;
+  margin-top: 25px;
+}
+
+.register-login a {
+  color: #A78BFA;
+  text-decoration: none;
+}
+
+.register-login a:hover {
+  color: #D8B978;
+}
+
+@media (max-width: 480px) {
+  .register-container {
+    padding: 30px 22px;
+  }
+
+  .register-container h1 {
+    font-size: 25px;
+  }
+}
+.form-message {
+  color: #D8B978;
+  font-size: 13px;
+  margin: 0 0 15px;
+  line-height: 1.5;
+}
