@@ -1,9 +1,10 @@
+
 import { useEffect, useState } from "react";
 import "./Dashboard.css";
 import Profile from "../sections/Profile";
 import MySkills from "../sections/MySkills";
 import CareerGuidance from "../sections/CareerGuidance";
-import CareerChat from "../components/CareerChat";
+import SkillGapAnalysis from "../components/SkillGapAnalysis";
 
 function Dashboard({ onLogout, currentUser }) {
   const [activePage, setActivePage] = useState("Dashboard");
@@ -176,9 +177,7 @@ function Dashboard({ onLogout, currentUser }) {
                   <div className="skill-item" key={skill.id || index}>
                     <div className="skill-info">
                       <span>{skill.skillName}</span>
-                      <span>
-                        {levelPercentage[skill.level] || 0}%
-                      </span>
+                      <span>{levelPercentage[skill.level] || 0}%</span>
                     </div>
 
                     <div className="skill-progress">
@@ -224,7 +223,7 @@ function Dashboard({ onLogout, currentUser }) {
             </div>
 
             <button
-              onClick={() => setActivePage("AI Career Assistant")}
+              onClick={() => setActivePage("Career Recommendations")}
             >
               Explore All →
             </button>
@@ -234,17 +233,12 @@ function Dashboard({ onLogout, currentUser }) {
             {careers.map((career) => (
               <div className="career-card" key={career.title}>
                 <div className="career-icon">{career.icon}</div>
-
                 <span className="career-match">{career.match}</span>
-
                 <h4>{career.title}</h4>
-
                 <p>{career.description}</p>
 
                 <button
-                  onClick={() =>
-                    setActivePage("AI Career Assistant")
-                  }
+                  onClick={() => setActivePage("Career Recommendations")}
                 >
                   Explore Career →
                 </button>
@@ -355,12 +349,11 @@ function Dashboard({ onLogout, currentUser }) {
         ) : activePage === "My Skills" ? (
           <MySkills currentUser={currentUser} />
         ) : activePage === "AI Career Assistant" ? (
-          <>
-            <CareerChat currentUser={currentUser} />
-            <CareerGuidance currentUser={currentUser} />
-          </>
+          <CareerGuidance currentUser={currentUser} />
         ) : activePage === "Career Recommendations" ? (
           <CareerGuidance currentUser={currentUser} />
+        ) : activePage === "Skill Gap Analysis" ? (
+          <SkillGapAnalysis currentUser={currentUser} />
         ) : (
           <div className="coming-soon">
             <div className="coming-soon-icon">✧</div>
