@@ -4,7 +4,9 @@ import "./Dashboard.css";
 import Profile from "../sections/Profile";
 import MySkills from "../sections/MySkills";
 import CareerGuidance from "../sections/CareerGuidance";
+import CareerRecommendations from "../sections/CareerRecommendations";
 import SkillGapAnalysis from "../components/SkillGapAnalysis";
+import LearningRoadmap from "../components/LearningRoadmap";
 
 function Dashboard({ onLogout, currentUser }) {
   const [activePage, setActivePage] = useState("Dashboard");
@@ -351,9 +353,11 @@ function Dashboard({ onLogout, currentUser }) {
         ) : activePage === "AI Career Assistant" ? (
           <CareerGuidance currentUser={currentUser} />
         ) : activePage === "Career Recommendations" ? (
-          <CareerGuidance currentUser={currentUser} />
+          <CareerRecommendations mySkills={mySkills} />
         ) : activePage === "Skill Gap Analysis" ? (
           <SkillGapAnalysis currentUser={currentUser} />
+        ) : activePage === "Learning Roadmap" ? (
+          <LearningRoadmap />
         ) : (
           <div className="coming-soon">
             <div className="coming-soon-icon">✧</div>
