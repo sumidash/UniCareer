@@ -1,0 +1,243 @@
+
+.skills-management {
+  padding: 25px;
+  width: 100%;
+  min-height: 100vh;
+  background: #f8f7fc;
+  box-sizing: border-box;
+  color: #292344;
+}
+
+.skills-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.skills-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 0 8px;
+  color: #292344;
+}
+
+.skills-header p {
+  color: #88839b;
+  font-size: 14px;
+  margin: 0;
+}
+
+.skills-total {
+  background: #ffffff;
+  padding: 18px 28px;
+  border-radius: 12px;
+  min-width: 120px;
+  box-shadow: 0 3px 15px rgba(40, 30, 80, 0.06);
+}
+
+.skills-total span {
+  font-size: 13px;
+  color: #88839b;
+}
+
+.skills-total h2 {
+  font-size: 27px;
+  margin: 7px 0 0;
+  color: #7054c7;
+}
+
+.skills-content {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.skills-form-card,
+.skills-table-card {
+  background: #ffffff;
+  padding: 25px;
+  border-radius: 14px;
+  box-shadow: 0 3px 15px rgba(40, 30, 80, 0.05);
+}
+
+.skills-form-card h2,
+.skills-table-card h2 {
+  font-size: 19px;
+  margin: 0 0 22px;
+  color: #30264f;
+}
+
+.skills-form-card form {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  align-items: end;
+  gap: 18px;
+}
+
+.skills-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.skills-input-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #51496b;
+}
+
+.skills-input-group input,
+.skills-input-group select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #e5e1ef;
+  border-radius: 8px;
+  outline: none;
+  background: #fcfbff;
+  color: #39314f;
+  font-size: 14px;
+  box-sizing: border-box;
+  transition: 0.2s ease;
+}
+
+.skills-input-group input:focus,
+.skills-input-group select:focus {
+  border-color: #7957d5;
+  box-shadow: 0 0 0 3px rgba(121, 87, 213, 0.1);
+}
+
+.skills-add-btn {
+  padding: 13px 20px;
+  border: none;
+  border-radius: 8px;
+  background: #7054c7;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+  white-space: nowrap;
+}
+
+.skills-add-btn:hover {
+  background: #5940a8;
+  transform: translateY(-2px);
+}
+
+.skills-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.skills-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  min-width: 600px;
+}
+
+.skills-table th {
+  padding: 15px;
+  background: #f7f5fc;
+  color: #665b85;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.skills-table td {
+  padding: 16px 15px;
+  border-bottom: 1px solid #f0edf5;
+  font-size: 14px;
+  color: #51496b;
+}
+
+.skills-table tbody tr:hover {
+  background: #fcfbff;
+}
+
+.skill-level {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.skill-level.beginner {
+  background: #e9f5ff;
+  color: #3183bd;
+}
+
+.skill-level.intermediate {
+  background: #fff4df;
+  color: #c18a27;
+}
+
+.skill-level.advanced {
+  background: #e7f8ef;
+  color: #26945c;
+}
+
+.skills-delete-btn {
+  padding: 7px 13px;
+  background: #fff0f0;
+  color: #df5252;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.skills-delete-btn:hover {
+  background: #df5252;
+  color: #ffffff;
+}
+
+.skills-empty {
+  text-align: center !important;
+  padding: 30px !important;
+  color: #999 !important;
+}
+
+@media (max-width: 1000px) {
+  .skills-form-card form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .skills-management {
+    padding: 15px;
+  }
+
+  .skills-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .skills-header h1 {
+    font-size: 23px;
+  }
+
+  .skills-total {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .skills-form-card,
+  .skills-table-card {
+    padding: 17px;
+  }
+
+  .skills-form-card form {
+    grid-template-columns: 1fr;
+  }
+
+  .skills-add-btn {
+    width: 100%;
+  }
+}
