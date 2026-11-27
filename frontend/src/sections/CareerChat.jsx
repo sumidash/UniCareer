@@ -83,9 +83,14 @@ function CareerChat({ currentUser }) {
           content: data.reply
         }
       ]);
-    } catch {
-      setError("Unable to connect to the AI assistant. Please check that the backend server is running and try again.");
-    } finally {
+    } catch (requestError) {
+  console.error("Career Chat Error:", requestError);
+
+  setError(
+    requestError.message ||
+    "Unable to connect to the AI assistant. Please try again."
+  );
+} finally {
       setIsLoading(false);
     }
   };
