@@ -1,28 +1,46 @@
+
 import { useState } from "react";
 import "./Login.css";
 
-function Login({ onLogin, onRegisterClick, users }) {
+function Login({ onLogin, onRegisterClick }) {
   const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
-    const matchedUser = users.find(
-      (user) =>
-        user.userId.toLowerCase() === userId.trim().toLowerCase() &&
-        user.password === password
-    );
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/auth/student/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: userId.trim(),
+            password,
+          }),
+        }
+      );
 
-    if (!matchedUser) {
-      setError("Invalid User ID or Password.");
-      return;
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.message || "Invalid User ID or Password.");
+        return;
+      }
+
+      onLogin(data.user, data.token);
+    } catch (error) {
+      setError("Unable to connect to server. Please try again.");
+    } finally {
+      setLoading(false);
     }
-
-    // Send the logged-in user's information to App.jsx
-    onLogin(matchedUser);
   }
 
   return (
@@ -69,7 +87,9 @@ function Login({ onLogin, onRegisterClick, users }) {
 
           {error && <p className="form-message">{error}</p>}
 
-          <button type="submit">Login</button>
+          <button type="submit" disabled={loading}>
+            {loading ? "Logging in..." : "Login"}
+          </button>
         </form>
 
         <p className="signup-text">

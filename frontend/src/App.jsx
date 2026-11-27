@@ -1,34 +1,39 @@
+
 import { useState } from "react";
 
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
-
 import "./App.css";
 
 function App() {
-  const [currentPage, setCurrentPage] = useState("login");
-  const [users, setUsers] = useState(() => {
+  const [currentPage, setCurrentPage] = useState(() => {
+    return localStorage.getItem("unicareerToken") &&
+      localStorage.getItem("unicareerUser")
+      ? "dashboard"
+      : "login";
+  });
+
+  const [currentUser, setCurrentUser] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem("unicareerUsers")) || [];
+      return JSON.parse(localStorage.getItem("unicareerUser")) || null;
     } catch {
-      return [];
+      return null;
     }
   });
 
-  const [currentUser, setCurrentUser] = useState(null);
+  function handleLogin(user, token) {
+    localStorage.setItem("unicareerToken", token);
+    localStorage.setItem("unicareerUser", JSON.stringify(user));
 
-  function updateUsers(newUsers) {
-    setUsers(newUsers);
-    localStorage.setItem("unicareerUsers", JSON.stringify(newUsers));
-  }
-
-  function handleLogin(user) {
     setCurrentUser(user);
     setCurrentPage("dashboard");
   }
 
   function handleLogout() {
+    localStorage.removeItem("unicareerToken");
+    localStorage.removeItem("unicareerUser");
+
     setCurrentUser(null);
     setCurrentPage("login");
   }
@@ -36,7 +41,6 @@ function App() {
   if (currentPage === "login") {
     return (
       <Login
-        users={users}
         onLogin={handleLogin}
         onRegisterClick={() => setCurrentPage("register")}
       />
@@ -46,8 +50,6 @@ function App() {
   if (currentPage === "register") {
     return (
       <Register
-        users={users}
-        setUsers={updateUsers}
         onLoginClick={() => setCurrentPage("login")}
       />
     );

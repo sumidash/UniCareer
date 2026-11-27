@@ -1,7 +1,8 @@
+
 import { useState } from "react";
 import "./Register.css";
 
-function Register({ onLoginClick, users, setUsers }) {
+function Register({ onLoginClick }) {
   const [formData, setFormData] = useState({
     fullName: "",
     userId: "",
@@ -11,6 +12,7 @@ function Register({ onLoginClick, users, setUsers }) {
   });
 
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   function handleChange(e) {
     setFormData({
@@ -19,7 +21,7 @@ function Register({ onLoginClick, users, setUsers }) {
     });
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     setError("");
 
@@ -33,21 +35,41 @@ function Register({ onLoginClick, users, setUsers }) {
       return;
     }
 
-    const userExists = users.some(
-      (user) => user.userId.toLowerCase() === formData.userId.trim().toLowerCase()
-    );
+    setLoading(true);
 
-    if (userExists) {
-      setError("This User ID is already registered.");
-      return;
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/auth/student/register",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.message || "Registration failed. Please try again.");
+        return;
+      }
+
+      setError("Account created successfully! Please login.");
+
+      setFormData({
+        fullName: "",
+        userId: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+      });
+    } catch (error) {
+      setError("Unable to connect to server. Please try again.");
+    } finally {
+      setLoading(false);
     }
-
-    setUsers([...users, {
-      ...formData,
-      userId: formData.userId.trim(),
-    }]);
-
-    setError("Account created successfully! Please login.");
   }
 
   return (
@@ -117,8 +139,8 @@ function Register({ onLoginClick, users, setUsers }) {
 
           {error && <p className="form-message">{error}</p>}
 
-          <button type="submit">
-            Create Account
+          <button type="submit" disabled={loading}>
+            {loading ? "Creating Account..." : "Create Account"}
           </button>
         </form>
 
