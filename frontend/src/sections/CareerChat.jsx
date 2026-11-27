@@ -8,13 +8,17 @@ function CareerChat({ currentUser }) {
 
   const welcomeMessage = {
     role: "assistant",
-    content: `Hello${currentUser?.fullName ? ` ${currentUser.fullName}` : ""}! I'm your UniCareer AI Career Assistant. Ask me anything about career paths, skills, learning plans, or professional development.`
+    content: `Hello${currentUser?.fullName ? ` ${currentUser.fullName}` : ""}! I'm your UniCareer AI Career Assistant. Ask me anything about career paths, skills, learning plans, or professional development.`,
   };
 
   const [messages, setMessages] = useState(() => {
     try {
       const saved = localStorage.getItem(storageKey);
-      return saved ? JSON.parse(saved) : [welcomeMessage];
+      const parsed = saved ? JSON.parse(saved) : null;
+
+      return Array.isArray(parsed) && parsed.length > 0
+        ? parsed
+        : [welcomeMessage];
     } catch {
       return [welcomeMessage];
     }
@@ -23,14 +27,39 @@ function CareerChat({ currentUser }) {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    try {
+      const saved = localStorage.getItem(storageKey);
+      const parsed = saved ? JSON.parse(saved) : null;
+
+      setMessages(
+        Array.isArray(parsed) && parsed.length > 0
+          ? parsed
+          : [welcomeMessage]
+      );
+    } catch {
+      setMessages([welcomeMessage]);
+    }
+
+    setInput("");
+    setError("");
+  }, [storageKey]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+    });
   }, [messages, isLoading]);
 
   useEffect(() => {
-    localStorage.setItem(storageKey, JSON.stringify(messages));
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(messages));
+    } catch {
+      console.error("Unable to save chat history.");
+    }
   }, [messages, storageKey]);
 
   const sendMessage = async (event) => {
@@ -42,7 +71,10 @@ function CareerChat({ currentUser }) {
 
     const updatedMessages = [
       ...messages,
-      { role: "user", content: message }
+      {
+        role: "user",
+        content: message,
+      },
     ];
 
     setMessages(updatedMessages);
@@ -51,40 +83,53 @@ function CareerChat({ currentUser }) {
     setIsLoading(true);
 
     const history = messages
-      .filter((item) => item.role === "user" || item.role === "assistant")
+      .filter(
+        (item) =>
+          item.role === "user" ||
+          item.role === "assistant"
+      )
       .slice(1)
       .map((item) => ({
         role: item.role === "assistant" ? "model" : "user",
-        parts: [{ text: item.content }]
+        parts: [{ text: item.content }],
       }));
 
     try {
-      const response = await fetch("http://localhost:5000/api/ai/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          message,
-          history
-        })
-      });
+      const response = await fetch(
+        "http://localhost:5000/api/ai/chat",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            message,
+            history,
+          }),
+        }
+      );
 
       const data = await response.json();
 
-      if (!response.ok || !data.success) {
-        throw new Error(data.message || "Unable to get an AI response.");
+      if (!response.ok || !data.success || !data.reply) {
+        throw new Error(
+          data.message || "Unable to get an AI response."
+        );
       }
 
       setMessages((previous) => [
         ...previous,
         {
           role: "assistant",
-          content: data.reply
-        }
+          content: data.reply,
+        },
       ]);
-    } catch {
-      setError("Unable to connect to the AI assistant. Please check that the backend server is running and try again.");
+    } catch (err) {
+      setError(
+        err.message === "Failed to fetch"
+          ? "Unable to connect to the AI assistant. Please check that the backend server is running."
+          : err.message || "Something went wrong. Please try again."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -94,24 +139,30 @@ function CareerChat({ currentUser }) {
     if (isLoading) return;
 
     setMessages([welcomeMessage]);
+    setInput("");
     setError("");
-    localStorage.removeItem(storageKey);
   };
 
   const suggestions = [
     "How can I become a frontend developer?",
     "What skills should I learn for my career?",
     "Help me choose a career path",
-    "Create a learning plan for me"
+    "Create a learning plan for me",
   ];
 
   return (
     <section className="career-chat-page">
       <div className="career-chat-header">
         <div>
-          <span className="career-chat-eyebrow">YOUR PERSONAL CAREER GUIDE</span>
+          <span className="career-chat-eyebrow">
+            YOUR PERSONAL CAREER GUIDE
+          </span>
+
           <h1>AI Career Assistant</h1>
-          <p>Explore your future with personalized career guidance.</p>
+
+          <p>
+            Explore your future with personalized career guidance.
+          </p>
         </div>
 
         <button
@@ -127,8 +178,10 @@ function CareerChat({ currentUser }) {
       <div className="career-chat-card">
         <div className="career-chat-card-header">
           <div className="career-chat-avatar">✦</div>
+
           <div>
             <h3>UniCareer Assistant</h3>
+
             <span>
               <span className="career-chat-online-dot"></span>
               AI Assistant
@@ -140,18 +193,25 @@ function CareerChat({ currentUser }) {
           {messages.map((message, index) => (
             <div
               className={`career-chat-message ${
-                message.role === "user" ? "user-message" : "ai-message"
+                message.role === "user"
+                  ? "user-message"
+                  : "ai-message"
               }`}
               key={index}
             >
               {message.role === "assistant" && (
-                <div className="career-chat-message-avatar">✦</div>
+                <div className="career-chat-message-avatar">
+                  ✦
+                </div>
               )}
 
               <div className="career-chat-bubble">
                 <span className="career-chat-sender">
-                  {message.role === "user" ? "You" : "UniCareer AI"}
+                  {message.role === "user"
+                    ? "You"
+                    : "UniCareer AI"}
                 </span>
+
                 <p>{message.content}</p>
               </div>
             </div>
@@ -159,9 +219,15 @@ function CareerChat({ currentUser }) {
 
           {isLoading && (
             <div className="career-chat-message ai-message">
-              <div className="career-chat-message-avatar">✦</div>
+              <div className="career-chat-message-avatar">
+                ✦
+              </div>
+
               <div className="career-chat-bubble">
-                <span className="career-chat-sender">UniCareer AI</span>
+                <span className="career-chat-sender">
+                  UniCareer AI
+                </span>
+
                 <div className="career-chat-typing">
                   <span></span>
                   <span></span>
@@ -177,6 +243,7 @@ function CareerChat({ currentUser }) {
         {messages.length === 1 && (
           <div className="career-chat-suggestions">
             <h4>Try asking</h4>
+
             <div>
               {suggestions.map((suggestion) => (
                 <button
@@ -197,16 +264,22 @@ function CareerChat({ currentUser }) {
           </div>
         )}
 
-        <form className="career-chat-input-area" onSubmit={sendMessage}>
+        <form
+          className="career-chat-input-area"
+          onSubmit={sendMessage}
+        >
           <textarea
             value={input}
             onChange={(event) => setInput(event.target.value)}
             placeholder="Ask anything about your career..."
-            rows="1"
+            rows={1}
             onKeyDown={(event) => {
-              if (event.key === "Enter" && !event.shiftKey) {
+              if (
+                event.key === "Enter" &&
+                !event.shiftKey
+              ) {
                 event.preventDefault();
-                sendMessage(event);
+                event.currentTarget.form.requestSubmit();
               }
             }}
             disabled={isLoading}
@@ -222,7 +295,8 @@ function CareerChat({ currentUser }) {
         </form>
 
         <p className="career-chat-footer-note">
-          UniCareer AI can make mistakes. Review important career and education decisions carefully.
+          UniCareer AI can make mistakes. Review important career
+          and education decisions carefully.
         </p>
       </div>
     </section>

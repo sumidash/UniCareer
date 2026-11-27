@@ -1,12 +1,15 @@
 
 import { useEffect, useState } from "react";
 import "./Dashboard.css";
+
 import Profile from "../sections/Profile";
 import MySkills from "../sections/MySkills";
-import CareerGuidance from "../sections/CareerGuidance";
 import CareerRecommendations from "../sections/CareerRecommendations";
+
 import SkillGapAnalysis from "../components/SkillGapAnalysis";
 import LearningRoadmap from "../components/LearningRoadmap";
+import CareerChat from "../sections/CareerChat";
+import ChatHistory from "../components/ChatHistory";
 
 function Dashboard({ onLogout, currentUser }) {
   const [activePage, setActivePage] = useState("Dashboard");
@@ -51,6 +54,7 @@ function Dashboard({ onLogout, currentUser }) {
     try {
       const savedSkills = localStorage.getItem(storageKey);
       const parsedSkills = savedSkills ? JSON.parse(savedSkills) : [];
+
       setMySkills(Array.isArray(parsedSkills) ? parsedSkills : []);
     } catch {
       setMySkills([]);
@@ -179,7 +183,9 @@ function Dashboard({ onLogout, currentUser }) {
                   <div className="skill-item" key={skill.id || index}>
                     <div className="skill-info">
                       <span>{skill.skillName}</span>
-                      <span>{levelPercentage[skill.level] || 0}%</span>
+                      <span>
+                        {levelPercentage[skill.level] || 0}%
+                      </span>
                     </div>
 
                     <div className="skill-progress">
@@ -235,8 +241,11 @@ function Dashboard({ onLogout, currentUser }) {
             {careers.map((career) => (
               <div className="career-card" key={career.title}>
                 <div className="career-icon">{career.icon}</div>
+
                 <span className="career-match">{career.match}</span>
+
                 <h4>{career.title}</h4>
+
                 <p>{career.description}</p>
 
                 <button
@@ -254,6 +263,7 @@ function Dashboard({ onLogout, currentUser }) {
 
           <div className="roadmap-text">
             <h3>Your Learning Roadmap</h3>
+
             <p>
               Follow a structured learning path to improve your skills
               and achieve your career goals.
@@ -272,11 +282,60 @@ function Dashboard({ onLogout, currentUser }) {
     );
   }
 
+  function renderPage() {
+    switch (activePage) {
+      case "Dashboard":
+        return renderDashboard();
+
+      case "My Profile":
+        return <Profile currentUser={currentUser} />;
+
+      case "My Skills":
+        return <MySkills currentUser={currentUser} />;
+
+      case "AI Career Assistant":
+        return <CareerChat currentUser={currentUser} />;
+
+      case "Career Recommendations":
+        return <CareerRecommendations mySkills={mySkills} />;
+
+      case "Skill Gap Analysis":
+        return <SkillGapAnalysis currentUser={currentUser} />;
+
+      case "Learning Roadmap":
+        return <LearningRoadmap />;
+
+      case "Chat History":
+        return <ChatHistory currentUser={currentUser} />;
+
+      default:
+        return (
+          <div className="coming-soon">
+            <div className="coming-soon-icon">✧</div>
+
+            <span>UNICAREER FEATURE</span>
+
+            <h2>{activePage}</h2>
+
+            <p>
+              This section is currently under development.
+              New features will be available soon.
+            </p>
+
+            <button onClick={() => setActivePage("Dashboard")}>
+              Back to Dashboard
+            </button>
+          </div>
+        );
+    }
+  }
+
   return (
     <div className="dashboard-layout">
       <aside className="dashboard-sidebar">
         <div className="dashboard-brand">
           <div className="brand-icon">U</div>
+
           <span>
             Uni<span>Career</span>
           </span>
@@ -312,7 +371,9 @@ function Dashboard({ onLogout, currentUser }) {
 
           <div className="sidebar-profile">
             <div className="profile-avatar">
-              {(currentUser?.fullName || "S").charAt(0).toUpperCase()}
+              {(currentUser?.fullName || "S")
+                .charAt(0)
+                .toUpperCase()}
             </div>
 
             <div>
@@ -329,6 +390,7 @@ function Dashboard({ onLogout, currentUser }) {
             <p className="topbar-subtitle">
               UNICAREER / STUDENT PORTAL
             </p>
+
             <h2>{activePage}</h2>
           </div>
 
@@ -339,43 +401,14 @@ function Dashboard({ onLogout, currentUser }) {
             </button>
 
             <div className="topbar-avatar">
-              {(currentUser?.fullName || "S").charAt(0).toUpperCase()}
+              {(currentUser?.fullName || "S")
+                .charAt(0)
+                .toUpperCase()}
             </div>
           </div>
         </header>
 
-        {activePage === "Dashboard" ? (
-          renderDashboard()
-        ) : activePage === "My Profile" ? (
-          <Profile currentUser={currentUser} />
-        ) : activePage === "My Skills" ? (
-          <MySkills currentUser={currentUser} />
-        )  : activePage === "AI Career Assistant" ? (
-  <CareerGuidance currentUser={currentUser} mode="assistant" />
-) : activePage === "Career Recommendations" ? (
-  <CareerGuidance currentUser={currentUser} mode="recommendations" />
-        ) : activePage === "Skill Gap Analysis" ? (
-          <SkillGapAnalysis currentUser={currentUser} />
-        ) : activePage === "Learning Roadmap" ? (
-          <LearningRoadmap />
-        ) : (
-          <div className="coming-soon">
-            <div className="coming-soon-icon">✧</div>
-
-            <span>UNICAREER FEATURE</span>
-
-            <h2>{activePage}</h2>
-
-            <p>
-              This section is currently under development. New features
-              will be available soon.
-            </p>
-
-            <button onClick={() => setActivePage("Dashboard")}>
-              Back to Dashboard
-            </button>
-          </div>
-        )}
+        {renderPage()}
       </main>
     </div>
   );
