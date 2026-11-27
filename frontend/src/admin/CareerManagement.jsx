@@ -1,58 +1,60 @@
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import "./CareerManagement.css";
 
-const initialCareers = [
-  {
-    id: 1,
-    title: "Frontend Developer",
-    category: "Web Development",
-    description: "Build responsive websites and interactive user interfaces.",
-    skills: ["HTML", "CSS", "JavaScript", "React"],
-  },
-  {
-    id: 2,
-    title: "Backend Developer",
-    category: "Software Development",
-    description: "Develop server-side applications, APIs and databases.",
-    skills: ["Node.js", "Express", "MongoDB", "SQL"],
-  },
-  {
-    id: 3,
-    title: "Data Scientist",
-    category: "Data Science",
-    description: "Analyze data and build predictive machine learning models.",
-    skills: ["Python", "Pandas", "Machine Learning", "Statistics"],
-  },
-  {
-    id: 4,
-    title: "UI/UX Designer",
-    category: "Design",
-    description: "Design user-friendly and attractive digital experiences.",
-    skills: ["Figma", "Wireframing", "Prototyping", "Design"],
-  },
-  {
-    id: 5,
-    title: "AI Engineer",
-    category: "Artificial Intelligence",
-    description: "Build intelligent systems using AI and machine learning.",
-    skills: ["Python", "TensorFlow", "Machine Learning", "Deep Learning"],
-  },
-];
-
 function CareerManagement() {
-  const [careers, setCareers] = useState(initialCareers);
+  const [careers, setCareers] = useState([]);
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All");
   const [selectedCareer, setSelectedCareer] = useState(null);
   const [showForm, setShowForm] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
 
   const [formData, setFormData] = useState({
     title: "",
     category: "",
     description: "",
     skills: "",
+    averageSalary: "",
+    demand: "Medium",
   });
+
+  const token = localStorage.getItem("unicareerToken");
+
+  async function fetchCareers() {
+    try {
+      setLoading(true);
+      setError("");
+
+      const response = await fetch(
+        "http://localhost:5000/api/admin/careers",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Unable to fetch careers.");
+      }
+
+      setCareers(data.careers || []);
+    } catch (err) {
+      setError(err.message || "Unable to connect to server.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchCareers();
+  }, []);
 
   const filteredCareers = useMemo(() => {
     return careers.filter((career) => {
@@ -72,46 +74,114 @@ function CareerManagement() {
     ...new Set(careers.map((career) => career.category)),
   ];
 
-  function handleAddCareer(e) {
-    e.preventDefault();
-
-    const newCareer = {
-      id: Date.now(),
-      title: formData.title.trim(),
-      category: formData.category.trim(),
-      description: formData.description.trim(),
-      skills: formData.skills
-        .split(",")
-        .map((skill) => skill.trim())
-        .filter(Boolean),
-    };
-
-    if (!newCareer.title || !newCareer.category) return;
-
-    setCareers((prev) => [...prev, newCareer]);
-
+  function handleFormChange(e) {
     setFormData({
-      title: "",
-      category: "",
-      description: "",
-      skills: "",
+      ...formData,
+      [e.target.name]: e.target.value,
     });
-
-    setShowForm(false);
   }
 
-  function handleDeleteCareer(id) {
+  async function handleAddCareer(e) {
+    e.preventDefault();
+    setError("");
+    setMessage("");
+
+    if (
+      !formData.title.trim() ||
+      !formData.category.trim() ||
+      !formData.description.trim()
+    ) {
+      setError("Please fill in all required fields.");
+      return;
+    }
+
+    try {
+      setSaving(true);
+
+      const response = await fetch(
+        "http://localhost:5000/api/admin/careers",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            title: formData.title.trim(),
+            category: formData.category.trim(),
+            description: formData.description.trim(),
+            requiredSkills: formData.skills
+              .split(",")
+              .map((skill) => skill.trim())
+              .filter(Boolean),
+            averageSalary: formData.averageSalary.trim() || "Not specified",
+            demand: formData.demand,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Unable to add career.");
+      }
+
+      setCareers((previous) => [data.career, ...previous]);
+
+      setFormData({
+        title: "",
+        category: "",
+        description: "",
+        skills: "",
+        averageSalary: "",
+        demand: "Medium",
+      });
+
+      setShowForm(false);
+      setMessage("Career added successfully.");
+    } catch (err) {
+      setError(err.message || "Unable to add career.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDeleteCareer(id) {
     const confirmed = window.confirm(
       "Are you sure you want to delete this career?"
     );
 
     if (!confirmed) return;
 
-    setCareers((prev) =>
-      prev.filter((career) => career.id !== id)
-    );
+    setError("");
+    setMessage("");
 
-    setSelectedCareer(null);
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/admin/careers/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Unable to delete career.");
+      }
+
+      setCareers((previous) =>
+        previous.filter((career) => career._id !== id)
+      );
+
+      setSelectedCareer(null);
+      setMessage("Career deleted successfully.");
+    } catch (err) {
+      setError(err.message || "Unable to delete career.");
+    }
   }
 
   return (
@@ -127,7 +197,11 @@ function CareerManagement() {
 
         <button
           className="career-add-btn"
-          onClick={() => setShowForm(true)}
+          onClick={() => {
+            setError("");
+            setMessage("");
+            setShowForm(true);
+          }}
         >
           + Add New Career
         </button>
@@ -159,6 +233,9 @@ function CareerManagement() {
         </div>
       </div>
 
+      {error && <p className="form-message">{error}</p>}
+      {message && <p>{message}</p>}
+
       <div className="career-content">
         <div className="career-content-heading">
           <div>
@@ -176,9 +253,7 @@ function CareerManagement() {
 
             <select
               value={categoryFilter}
-              onChange={(e) =>
-                setCategoryFilter(e.target.value)
-              }
+              onChange={(e) => setCategoryFilter(e.target.value)}
             >
               <option value="All">All Categories</option>
 
@@ -203,9 +278,15 @@ function CareerManagement() {
             </thead>
 
             <tbody>
-              {filteredCareers.length > 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan="4" className="career-empty">
+                    Loading careers...
+                  </td>
+                </tr>
+              ) : filteredCareers.length > 0 ? (
                 filteredCareers.map((career) => (
-                  <tr key={career.id}>
+                  <tr key={career._id}>
                     <td className="career-title">
                       {career.title}
                     </td>
@@ -217,8 +298,10 @@ function CareerManagement() {
                     </td>
 
                     <td>
-                      {career.skills.slice(0, 3).join(", ")}
-                      {career.skills.length > 3 && "..."}
+                      {(career.requiredSkills || [])
+                        .slice(0, 3)
+                        .join(", ")}
+                      {(career.requiredSkills || []).length > 3 && "..."}
                     </td>
 
                     <td>
@@ -231,9 +314,7 @@ function CareerManagement() {
 
                       <button
                         className="career-delete-btn"
-                        onClick={() =>
-                          handleDeleteCareer(career.id)
-                        }
+                        onClick={() => handleDeleteCareer(career._id)}
                       >
                         Delete
                       </button>
@@ -243,7 +324,7 @@ function CareerManagement() {
               ) : (
                 <tr>
                   <td colSpan="4" className="career-empty">
-                    No careers found.
+                    {error ? error : "No careers found."}
                   </td>
                 </tr>
               )}
@@ -269,59 +350,68 @@ function CareerManagement() {
               <label>Career Title</label>
               <input
                 type="text"
+                name="title"
                 placeholder="e.g. Software Engineer"
                 value={formData.title}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    title: e.target.value,
-                  })
-                }
+                onChange={handleFormChange}
                 required
               />
 
               <label>Category</label>
               <input
                 type="text"
+                name="category"
                 placeholder="e.g. Software Development"
                 value={formData.category}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    category: e.target.value,
-                  })
-                }
+                onChange={handleFormChange}
                 required
               />
 
               <label>Description</label>
               <textarea
+                name="description"
                 placeholder="Enter career description..."
                 value={formData.description}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    description: e.target.value,
-                  })
-                }
+                onChange={handleFormChange}
                 rows="3"
+                required
               />
 
               <label>Required Skills</label>
               <input
                 type="text"
+                name="skills"
                 placeholder="Python, Java, SQL (comma separated)"
                 value={formData.skills}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    skills: e.target.value,
-                  })
-                }
+                onChange={handleFormChange}
               />
 
-              <button type="submit" className="career-submit-btn">
-                Add Career
+              <label>Average Salary</label>
+              <input
+                type="text"
+                name="averageSalary"
+                placeholder="e.g. $50,000 - $80,000"
+                value={formData.averageSalary}
+                onChange={handleFormChange}
+              />
+
+              <label>Career Demand</label>
+              <select
+                name="demand"
+                value={formData.demand}
+                onChange={handleFormChange}
+              >
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+              </select>
+
+              <button
+                type="submit"
+                className="career-submit-btn"
+                disabled={saving}
+              >
+                {saving ? "Adding..." : "Add Career"}
               </button>
             </form>
           </div>
@@ -361,10 +451,16 @@ function CareerManagement() {
             <h3>Required Skills</h3>
 
             <div className="career-skill-list">
-              {selectedCareer.skills.map((skill, index) => (
+              {(selectedCareer.requiredSkills || []).map((skill, index) => (
                 <span key={index}>{skill}</span>
               ))}
             </div>
+
+            <h3>Average Salary</h3>
+            <p>{selectedCareer.averageSalary || "Not specified"}</p>
+
+            <h3>Career Demand</h3>
+            <p>{selectedCareer.demand || "Medium"}</p>
 
             <button
               className="career-submit-btn"

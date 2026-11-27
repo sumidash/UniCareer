@@ -1,3 +1,4 @@
+
 const Skill = require("../models/Skill");
 const Career = require("../models/Career");
 const express = require("express");
@@ -26,8 +27,6 @@ router.get("/students", verifyToken, verifyAdmin, async (req, res) => {
     });
   }
 });
-
-
 
 router.get("/careers", verifyToken, verifyAdmin, async (req, res) => {
   try {
@@ -90,6 +89,82 @@ router.post("/careers", verifyToken, verifyAdmin, async (req, res) => {
   }
 });
 
+router.delete("/careers/:id", verifyToken, verifyAdmin, async (req, res) => {
+  try {
+    const career = await Career.findByIdAndDelete(req.params.id);
+
+    if (!career) {
+      return res.status(404).json({
+        success: false,
+        message: "Career not found.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Career deleted successfully.",
+    });
+  } catch (error) {
+    console.error("Delete Career Error:", error.message);
+
+    return res.status(500).json({
+      success: false,
+      message: "Unable to delete career.",
+    });
+  }
+});
+
+router.delete("/careers/:id", verifyToken, verifyAdmin, async (req, res) => {
+  try {
+    const career = await Career.findByIdAndDelete(req.params.id);
+
+    if (!career) {
+      return res.status(404).json({
+        success: false,
+        message: "Career not found.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Career deleted successfully.",
+    });
+  } catch (error) {
+    console.error("Delete Career Error:", error.message);
+
+    return res.status(500).json({
+      success: false,
+      message: "Unable to delete career.",
+    });
+  }
+});
+
+
+router.delete("/careers/:id", verifyToken, verifyAdmin, async (req, res) => {
+  try {
+    const career = await Career.findByIdAndDelete(req.params.id);
+
+    if (!career) {
+      return res.status(404).json({
+        success: false,
+        message: "Career not found.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Career deleted successfully.",
+    });
+  } catch (error) {
+    console.error("Delete Career Error:", error.message);
+
+    return res.status(500).json({
+      success: false,
+      message: "Unable to delete career.",
+    });
+  }
+});
+
 router.get("/skills", verifyToken, verifyAdmin, async (req, res) => {
   try {
     const skills = await Skill.find().sort({ createdAt: -1 });
@@ -121,9 +196,9 @@ router.post("/skills", verifyToken, verifyAdmin, async (req, res) => {
     }
 
     const skill = await Skill.create({
-      name,
-      category,
-      description,
+      name: name.trim(),
+      category: category.trim(),
+      description: description || "",
     });
 
     return res.status(201).json({
@@ -148,6 +223,67 @@ router.post("/skills", verifyToken, verifyAdmin, async (req, res) => {
   }
 });
 
+router.delete("/skills/:id", verifyToken, verifyAdmin, async (req, res) => {
+  try {
+    const skill = await Skill.findByIdAndDelete(req.params.id);
+
+    if (!skill) {
+      return res.status(404).json({
+        success: false,
+        message: "Skill not found.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Skill deleted successfully.",
+    });
+  } catch (error) {
+    console.error("Delete Skill Error:", error.message);
+
+    return res.status(500).json({
+      success: false,
+      message: "Unable to delete skill.",
+    });
+  }
+});
+
+router.get("/dashboard-stats", verifyToken, verifyAdmin, async (req, res) => {
+  try {
+    const totalStudents = await User.countDocuments({ role: "student" });
+    const totalCareers = await Career.countDocuments();
+    const totalSkills = await Skill.countDocuments();
+
+    const careerDistribution = await Career.aggregate([
+      {
+        $group: {
+          _id: "$category",
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $sort: { count: -1 },
+      },
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      stats: {
+        totalStudents,
+        totalCareers,
+        totalSkills,
+        careerDistribution,
+      },
+    });
+  } catch (error) {
+    console.error("Dashboard Stats Error:", error.message);
+
+    return res.status(500).json({
+      success: false,
+      message: "Unable to fetch dashboard statistics.",
+    });
+  }
+});
 
 
 module.exports = router;

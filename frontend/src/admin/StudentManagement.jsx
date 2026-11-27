@@ -1,70 +1,76 @@
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import "./StudentManagement.css";
 
-const sampleStudents = [
-  {
-    id: "STU-001",
-    name: "Ayesha Rahman",
-    email: "ayesha@gmail.com",
-    department: "CSE",
-    status: "Active",
-  },
-  {
-    id: "STU-002",
-    name: "Tanvir Ahmed",
-    email: "tanvir@gmail.com",
-    department: "EEE",
-    status: "Active",
-  },
-  {
-    id: "STU-003",
-    name: "Nusrat Jahan",
-    email: "nusrat@gmail.com",
-    department: "CSE",
-    status: "Inactive",
-  },
-  {
-    id: "STU-004",
-    name: "Rakib Hasan",
-    email: "rakib@gmail.com",
-    department: "BBA",
-    status: "Active",
-  },
-  {
-    id: "STU-005",
-    name: "Sadia Islam",
-    email: "sadia@gmail.com",
-    department: "CSE",
-    status: "Active",
-  },
-];
-
 function StudentManagement() {
-  const [students] = useState(sampleStudents);
+  const [students, setStudents] = useState([]);
   const [search, setSearch] = useState("");
   const [selectedStudent, setSelectedStudent] = useState(null);
-  const [statusFilter, setStatusFilter] = useState("All");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    async function fetchStudents() {
+      try {
+        const token = localStorage.getItem("unicareerToken");
+
+        if (!token) {
+          setError("Admin authentication token not found. Please login again.");
+          return;
+        }
+
+        const response = await fetch(
+          "http://localhost:5000/api/admin/students",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || "Unable to fetch students.");
+        }
+
+        setStudents(data.students || []);
+      } catch (err) {
+        setError(err.message || "Unable to connect to server.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchStudents();
+  }, []);
 
   const filteredStudents = useMemo(() => {
     return students.filter((student) => {
-      const matchesSearch =
-        student.name.toLowerCase().includes(search.toLowerCase()) ||
-        student.email.toLowerCase().includes(search.toLowerCase()) ||
-        student.id.toLowerCase().includes(search.toLowerCase());
+      const name = student.fullName || "";
+      const email = student.email || "";
+      const userId = student.userId || "";
 
-      const matchesStatus =
-        statusFilter === "All" || student.status === statusFilter;
+      const query = search.toLowerCase();
 
-      return matchesSearch && matchesStatus;
+      return (
+        name.toLowerCase().includes(query) ||
+        email.toLowerCase().includes(query) ||
+        userId.toLowerCase().includes(query)
+      );
     });
-  }, [students, search, statusFilter]);
+  }, [students, search]);
 
-  const activeCount = students.filter(
-    (student) => student.status === "Active"
-  ).length;
+  function formatDate(date) {
+    if (!date) return "Not available";
 
-  const inactiveCount = students.length - activeCount;
+    return new Date(date).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  }
 
   return (
     <div className="student-management">
@@ -74,6 +80,7 @@ function StudentManagement() {
           <h1>Student Management</h1>
           <p>View and manage registered students.</p>
         </div>
+
         <div className="student-total-label">
           Total Students: {students.length}
         </div>
@@ -91,16 +98,8 @@ function StudentManagement() {
         <div className="student-stat-card">
           <div className="student-stat-icon">✓</div>
           <div>
-            <p>Active Students</p>
-            <h2>{activeCount}</h2>
-          </div>
-        </div>
-
-        <div className="student-stat-card">
-          <div className="student-stat-icon">○</div>
-          <div>
-            <p>Inactive Students</p>
-            <h2>{inactiveCount}</h2>
+            <p>Registered Students</p>
+            <h2>{students.length}</h2>
           </div>
         </div>
       </div>
@@ -109,7 +108,7 @@ function StudentManagement() {
         <div className="student-table-heading">
           <div>
             <h2>All Students</h2>
-            <p>Search and view student information</p>
+            <p>Search and view registered student information.</p>
           </div>
 
           <div className="student-filters">
@@ -119,15 +118,6 @@ function StudentManagement() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
-
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              <option value="All">All Status</option>
-              <option value="Active">Active</option>
-              <option value="Inactive">Inactive</option>
-            </select>
           </div>
         </div>
 
@@ -138,31 +128,31 @@ function StudentManagement() {
                 <th>Student ID</th>
                 <th>Student Name</th>
                 <th>Email Address</th>
-                <th>Department</th>
-                <th>Status</th>
+                <th>Registration Date</th>
                 <th>Action</th>
               </tr>
             </thead>
 
             <tbody>
-              {filteredStudents.length > 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan="5" className="student-empty">
+                    Loading students...
+                  </td>
+                </tr>
+              ) : error ? (
+                <tr>
+                  <td colSpan="5" className="student-empty">
+                    {error}
+                  </td>
+                </tr>
+              ) : filteredStudents.length > 0 ? (
                 filteredStudents.map((student) => (
-                  <tr key={student.id}>
-                    <td>{student.id}</td>
-                    <td className="student-name">{student.name}</td>
+                  <tr key={student._id}>
+                    <td>{student.userId}</td>
+                    <td className="student-name">{student.fullName}</td>
                     <td>{student.email}</td>
-                    <td>{student.department}</td>
-                    <td>
-                      <span
-                        className={`student-status ${
-                          student.status === "Active"
-                            ? "status-active"
-                            : "status-inactive"
-                        }`}
-                      >
-                        {student.status}
-                      </span>
-                    </td>
+                    <td>{formatDate(student.createdAt)}</td>
                     <td>
                       <button
                         className="student-view-btn"
@@ -175,7 +165,7 @@ function StudentManagement() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="6" className="student-empty">
+                  <td colSpan="5" className="student-empty">
                     No students found.
                   </td>
                 </tr>
@@ -202,20 +192,25 @@ function StudentManagement() {
             </button>
 
             <span className="student-page-tag">STUDENT DETAILS</span>
-            <h2>{selectedStudent.name}</h2>
+
+            <h2>{selectedStudent.fullName}</h2>
 
             <div className="student-detail-list">
               <p>
-                <strong>Student ID:</strong> {selectedStudent.id}
+                <strong>Student ID:</strong> {selectedStudent.userId}
               </p>
+
               <p>
                 <strong>Email:</strong> {selectedStudent.email}
               </p>
+
               <p>
-                <strong>Department:</strong> {selectedStudent.department}
+                <strong>Role:</strong> {selectedStudent.role}
               </p>
+
               <p>
-                <strong>Status:</strong> {selectedStudent.status}
+                <strong>Registered:</strong>{" "}
+                {formatDate(selectedStudent.createdAt)}
               </p>
             </div>
 
