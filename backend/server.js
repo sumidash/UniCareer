@@ -7,14 +7,17 @@ const connectDB = require("./config/db");
 const aiRoutes = require("./routes/aiRoutes");
 const authRoutes = require("./routes/authRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+const adminSetupRoutes = require("./routes/adminSetupRoutes");
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+
 app.use("/api/ai", aiRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/admin-setup", adminSetupRoutes);
 
 app.get("/", (req, res) => {
   res.send("UniCareer Backend Server is Running!");
