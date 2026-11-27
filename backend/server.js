@@ -5,12 +5,16 @@ require("dotenv").config();
 
 const connectDB = require("./config/db");
 const aiRoutes = require("./routes/aiRoutes");
+const authRoutes = require("./routes/authRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 app.use("/api/ai", aiRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/admin", adminRoutes);
 
 app.get("/", (req, res) => {
   res.send("UniCareer Backend Server is Running!");
