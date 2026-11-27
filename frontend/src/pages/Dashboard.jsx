@@ -350,10 +350,10 @@ function Dashboard({ onLogout, currentUser }) {
           <Profile currentUser={currentUser} />
         ) : activePage === "My Skills" ? (
           <MySkills currentUser={currentUser} />
-        ) : activePage === "AI Career Assistant" ? (
-          <CareerGuidance currentUser={currentUser} />
-        ) : activePage === "Career Recommendations" ? (
-          <CareerRecommendations mySkills={mySkills} />
+        )  : activePage === "AI Career Assistant" ? (
+  <CareerGuidance currentUser={currentUser} mode="assistant" />
+) : activePage === "Career Recommendations" ? (
+  <CareerGuidance currentUser={currentUser} mode="recommendations" />
         ) : activePage === "Skill Gap Analysis" ? (
           <SkillGapAnalysis currentUser={currentUser} />
         ) : activePage === "Learning Roadmap" ? (

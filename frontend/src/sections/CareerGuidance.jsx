@@ -1,6 +1,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import "./CareerGuidance.css";
+import CareerChat from "./CareerChat";
 
 const careerData = [
   {
@@ -188,7 +189,7 @@ function getCareerAnalysis(career, skills, interests, careerGoal) {
   };
 }
 
-function CareerGuidance({ currentUser }) {
+function CareerGuidance({ currentUser, mode = "recommendations" }) {
   const userId = currentUser?.userId || "unknown";
 
   const [profile, setProfile] = useState({});
@@ -297,12 +298,16 @@ function CareerGuidance({ currentUser }) {
     ];
   }, [searchTerm, analysis]);
 
+  if (mode === "assistant") {
+    return <CareerChat currentUser={currentUser} />;
+  }
+
   return (
     <section className="career-guidance">
 
       <div className="career-guidance-header">
         <div>
-          <span className="career-eyebrow">AI CAREER ASSISTANT</span>
+          <span className="career-eyebrow">CAREER RECOMMENDATIONS</span>
           <h1>Discover Your Career Path</h1>
           <p>
             Explore career opportunities based on your interests,
