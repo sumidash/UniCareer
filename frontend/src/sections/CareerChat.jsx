@@ -125,6 +125,8 @@ function CareerChat({ currentUser }) {
         },
       ]);
     } catch (err) {
+      console.error("Career Chat Error:", err);
+
       setError(
         err.message === "Failed to fetch"
           ? "Unable to connect to the AI assistant. Please check that the backend server is running."
