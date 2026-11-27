@@ -4,15 +4,12 @@ import { useState } from "react";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
+import AdminPanel from "./admin/AdminPanel";
+import AdminSetup from "./pages/AdminSetup";
 import "./App.css";
 
 function App() {
-  const [currentPage, setCurrentPage] = useState(() => {
-    return localStorage.getItem("unicareerToken") &&
-      localStorage.getItem("unicareerUser")
-      ? "dashboard"
-      : "login";
-  });
+  const [currentPage, setCurrentPage] = useState("login");
 
   const [currentUser, setCurrentUser] = useState(() => {
     try {
@@ -27,38 +24,37 @@ function App() {
     localStorage.setItem("unicareerUser", JSON.stringify(user));
 
     setCurrentUser(user);
-    setCurrentPage("dashboard");
+    setCurrentPage(user.role === "admin" ? "admin" : "dashboard");
   }
 
   function handleLogout() {
     localStorage.removeItem("unicareerToken");
     localStorage.removeItem("unicareerUser");
-
     setCurrentUser(null);
     setCurrentPage("login");
   }
 
-  if (currentPage === "login") {
-    return (
-      <Login
-        onLogin={handleLogin}
-        onRegisterClick={() => setCurrentPage("register")}
-      />
-    );
+  if (currentPage === "adminSetup") {
+    return <AdminSetup onBack={() => setCurrentPage("login")} />;
   }
 
   if (currentPage === "register") {
-    return (
-      <Register
-        onLoginClick={() => setCurrentPage("login")}
-      />
-    );
+    return <Register onLoginClick={() => setCurrentPage("login")} />;
+  }
+
+  if (currentPage === "admin") {
+    return <AdminPanel admin={currentUser} onLogout={handleLogout} />;
+  }
+
+  if (currentPage === "dashboard") {
+    return <Dashboard currentUser={currentUser} onLogout={handleLogout} />;
   }
 
   return (
-    <Dashboard
-      currentUser={currentUser}
-      onLogout={handleLogout}
+    <Login
+      onLogin={handleLogin}
+      onRegisterClick={() => setCurrentPage("register")}
+      onAdminSetupClick={() => setCurrentPage("adminSetup")}
     />
   );
 }

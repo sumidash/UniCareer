@@ -2,9 +2,10 @@
 import { useState } from "react";
 import "./Login.css";
 
-function Login({ onLogin, onRegisterClick }) {
+function Login({ onLogin, onRegisterClick, onAdminSetupClick }) {
   const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("");
+  const [loginRole, setLoginRole] = useState("student");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -14,19 +15,21 @@ function Login({ onLogin, onRegisterClick }) {
     setLoading(true);
 
     try {
-      const response = await fetch(
-        "http://localhost:5000/api/auth/student/login",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userId: userId.trim(),
-            password,
-          }),
-        }
-      );
+      const endpoint =
+        loginRole === "admin"
+          ? "http://localhost:5000/api/auth/admin/login"
+          : "http://localhost:5000/api/auth/student/login";
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: userId.trim(),
+          password,
+        }),
+      });
 
       const data = await response.json();
 
@@ -36,7 +39,7 @@ function Login({ onLogin, onRegisterClick }) {
       }
 
       onLogin(data.user, data.token);
-    } catch (error) {
+    } catch {
       setError("Unable to connect to server. Please try again.");
     } finally {
       setLoading(false);
@@ -57,7 +60,19 @@ function Login({ onLogin, onRegisterClick }) {
         </p>
 
         <form onSubmit={handleSubmit} autoComplete="off">
+          <label>Login As</label>
+
+          <select
+            value={loginRole}
+            onChange={(e) => setLoginRole(e.target.value)}
+            className="login-role-select"
+          >
+            <option value="student">Student</option>
+            <option value="admin">Admin</option>
+          </select>
+
           <label>User ID</label>
+
           <input
             type="text"
             name="login-user-id"
@@ -69,6 +84,7 @@ function Login({ onLogin, onRegisterClick }) {
           />
 
           <label>Password</label>
+
           <input
             type="password"
             name="login-password"
@@ -92,16 +108,30 @@ function Login({ onLogin, onRegisterClick }) {
           </button>
         </form>
 
+        {loginRole === "student" && (
+          <p className="signup-text">
+            Don't have an account?{" "}
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                onRegisterClick();
+              }}
+            >
+              Sign Up
+            </a>
+          </p>
+        )}
+
         <p className="signup-text">
-          Don't have an account?{" "}
           <a
             href="#"
             onClick={(e) => {
               e.preventDefault();
-              onRegisterClick();
+              onAdminSetupClick();
             }}
           >
-            Sign Up
+            Initial Admin Setup
           </a>
         </p>
       </div>
