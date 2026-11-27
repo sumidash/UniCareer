@@ -1,0 +1,93 @@
+.career-chat {
+  width: 600px;
+  max-width: 90%;
+  margin: 50px auto;
+  padding: 25px;
+  background: #ffffff;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px #ddd;
+  font-family: Arial, sans-serif;
+}
+
+.career-chat h1 {
+  text-align: center;
+  color: #6c3fc5;
+}
+
+.career-chat h2 {
+  text-align: center;
+  color: #333;
+}
+
+.chat-box {
+  height: 350px;
+  overflow-y: auto;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: #f9f7ff;
+  margin-bottom: 15px;
+}
+
+.user-message {
+  background: #6c3fc5;
+  color: white;
+  padding: 10px;
+  border-radius: 10px;
+  text-align: right;
+  margin-left: 50px;
+}
+
+.bot-message {
+  background: #e9e1f7;
+  color: #333;
+  padding: 10px;
+  border-radius: 10px;
+  margin-right: 50px;
+}
+
+.chat-input {
+  display: flex;
+  gap: 10px;
+}
+
+.chat-input input {
+  flex: 1;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  outline: none;
+}
+
+.chat-input input:focus {
+  border-color: #6c3fc5;
+}
+
+.chat-input button {
+  padding: 12px 20px;
+  background: #6c3fc5;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.chat-input button:hover {
+  background: #512ca0;
+}
+
+@media (max-width: 600px) {
+  .career-chat {
+    padding: 15px;
+    margin: 20px auto;
+  }
+
+  .chat-box {
+    height: 400px;
+  }
+
+  .chat-input button {
+    padding: 10px;
+  }
+}
