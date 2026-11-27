@@ -316,13 +316,13 @@
   .student-table-heading {
     padding: 18px;
   }
-
-  .student-filters {
-    flex-direction: column;
-  }
-
   .student-filters input,
   .student-filters select {
     width: 100%;
   }
 }
+
+  .student-filters {
+    flex-direction: column;
+  }
+
